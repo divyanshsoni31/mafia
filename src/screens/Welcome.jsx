@@ -1,26 +1,40 @@
 import { ROLES, ROLE_NAMES } from '../game/roles.js';
 import { FullscreenButton, RoleTag } from '../components.jsx';
-import { RoleArt } from '../RoleArt.jsx';
+import { RoleArt, ROLE_COLORS, rgbOf } from '../RoleArt.jsx';
 import { Skyline } from '../Scenes.jsx';
 
 export function Welcome({ onNew, onHowTo }) {
+  // Two copies of the deck so the marquee loops seamlessly.
+  const reel = [...ROLE_NAMES, ...ROLE_NAMES];
   return (
     <div className="welcome">
-      <Skyline time="night" size="hero">
-        <h1 className="title-glow">Shadow Mafia</h1>
-        <p className="tagline">One phone. One God. Trust no one.</p>
+      <Skyline time="night" size="hero" fx>
+        <div className="wl-logo" aria-hidden="true"><RoleArt role="Mafia" size={84} /></div>
+        <h1 className="wl-title">
+          <span className="wl-shadow">Shadow</span>
+          <span className="wl-mafia">Mafia</span>
+        </h1>
+        <p className="wl-tag">One phone · One God · Trust no one</p>
       </Skyline>
-      <div className="art-row" aria-hidden="true">
-        {ROLE_NAMES.map((r) => <RoleArt key={r} role={r} size={44} />)}
+
+      <div className="wl-reel" aria-hidden="true">
+        <div className="wl-track">
+          {reel.map((r, i) => (
+            <span key={i} className="wl-chip" style={{ '--rc': ROLE_COLORS[r], '--rc-rgb': rgbOf(ROLE_COLORS[r]) }}>
+              <RoleArt role={r} size={30} />
+              {r}
+            </span>
+          ))}
+        </div>
       </div>
-      <div className="stack narrow">
-        <button className="btn primary big" onClick={onNew}>New Game</button>
-        <button className="btn ghost big" onClick={onHowTo}>How to Play</button>
-        <FullscreenButton className="btn ghost" />
+
+      <div className="wl-actions">
+        <button className="btn-neon" onClick={onNew}><span>🎭 New Game</span></button>
+        <button className="btn-glass" onClick={onHowTo}>📜 How to Play</button>
+        <FullscreenButton className="btn-glass small" label />
       </div>
       <p className="fine">
-        The game lives only in this browser tab — refreshing or closing the page ends it. Built for a trusted group
-        sharing one device: secrets are hidden on screen, not protected against developer tools.
+        Runs on this device only. Refreshing or closing the page ends the game.
       </p>
     </div>
   );

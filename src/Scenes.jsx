@@ -17,58 +17,51 @@ for (let x = 0; x < 400; ) {
   BUILDINGS.push({ x, w, h, windows, spire: rand() < 0.15 });
   x += w + 2;
 }
-const STARS = Array.from({ length: 40 }, () => [rand() * 400, rand() * 90, rand() * 1.2 + 0.4]);
+// Stars as CSS radial-gradient dots: crisp at any size (an SVG scaled to fill a tall screen made them blobs).
+const STARS = Array.from({ length: 48 }, () => [rand() * 100, rand() * 58, 1 + rand() * 1.6]);
+const starLayer = (layer) =>
+  STARS.filter((_, i) => i % 2 === layer)
+    .map(([x, y, r]) => `radial-gradient(${r}px ${r}px at ${x.toFixed(1)}% ${y.toFixed(1)}%, #fff 50%, rgba(255,255,255,0) 100%)`)
+    .join(', ');
+const STAR_BG = [starLayer(0), starLayer(1)];
 
-const SKIES = {
-  night: ['#05060d', '#141233', '#2a1f4d'],
-  dawn: ['#1e1b3a', '#7c3a5c', '#f59e0b'],
-};
+// City at its natural proportions, pinned to the bottom of the scene.
+function City({ time }) {
+  return (
+    <svg className="scene-city" viewBox="0 0 400 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      {BUILDINGS.map((bd, i) => (
+        <g key={i}>
+          <rect x={bd.x} y={160 - bd.h} width={bd.w} height={bd.h} fill="#07080d" />
+          {bd.spire && <path d={`M${bd.x + bd.w / 2 - 3} ${160 - bd.h} L${bd.x + bd.w / 2} ${148 - bd.h} L${bd.x + bd.w / 2 + 3} ${160 - bd.h} Z`} fill="#07080d" />}
+          {bd.windows.map(([wx, wy], j) => (
+            <rect key={j} x={wx} y={wy} width="4" height="5" fill={time === 'night' ? '#fbbf24' : '#fde68a'} opacity={time === 'night' ? 0.8 : 0.35} />
+          ))}
+        </g>
+      ))}
+    </svg>
+  );
+}
 
-export function Skyline({ time = 'night', size = 'banner', children }) {
+// fx: extra welcome-screen effects (sweeping searchlights + drifting fog).
+export function Skyline({ time = 'night', size = 'banner', fx = false, children }) {
   const img = artFor(time === 'night' ? 'night' : 'morning');
-  const [a, b, c] = SKIES[time];
   return (
     <div className={`scene ${time} ${size}`}>
       {img ? (
         <img className="scene-img" src={img} alt="" />
       ) : (
-        <svg className="scene-svg" viewBox="0 0 400 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-          <defs>
-            <linearGradient id={`sky-${time}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor={a} />
-              <stop offset="0.6" stopColor={b} />
-              <stop offset="1" stopColor={c} />
-            </linearGradient>
-            <radialGradient id={`glow-${time}`}>
-              <stop offset="0" stopColor={time === 'night' ? '#e9e3ff' : '#fde68a'} stopOpacity="0.55" />
-              <stop offset="1" stopColor={time === 'night' ? '#8b5cf6' : '#f97316'} stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <rect width="400" height="160" fill={`url(#sky-${time})`} />
-          {time === 'night' &&
-            STARS.map(([x, y, r], i) => <circle key={i} className="twinkle" style={{ animationDelay: `${(i % 7) * 0.4}s` }} cx={x} cy={y} r={r} fill="#fff" />)}
-          {time === 'night' ? (
-            <g>
-              <circle cx="320" cy="38" r="40" fill={`url(#glow-${time})`} />
-              <circle cx="320" cy="38" r="17" fill="#ece8ff" />
-              <circle cx="328" cy="33" r="15" fill={b} />
-            </g>
-          ) : (
-            <g>
-              <circle cx="200" cy="150" r="90" fill={`url(#glow-${time})`} />
-              <circle cx="200" cy="150" r="30" fill="#fcd34d" />
-            </g>
+        <>
+          {time === 'night' && STAR_BG.map((bg, i) => <div key={i} className={`scene-stars s${i}`} style={{ backgroundImage: bg }} />)}
+          {time === 'night' ? <div className="scene-moon" /> : <div className="scene-sun" />}
+          {fx && (
+            <>
+              <div className="fx-beam l" />
+              <div className="fx-beam r" />
+            </>
           )}
-          {BUILDINGS.map((bd, i) => (
-            <g key={i}>
-              <rect x={bd.x} y={160 - bd.h} width={bd.w} height={bd.h} fill="#07080d" />
-              {bd.spire && <path d={`M${bd.x + bd.w / 2 - 3} ${160 - bd.h} L${bd.x + bd.w / 2} ${148 - bd.h} L${bd.x + bd.w / 2 + 3} ${160 - bd.h} Z`} fill="#07080d" />}
-              {bd.windows.map(([wx, wy], j) => (
-                <rect key={j} x={wx} y={wy} width="4" height="5" fill={time === 'night' ? '#fbbf24' : '#fde68a'} opacity={time === 'night' ? 0.8 : 0.35} />
-              ))}
-            </g>
-          ))}
-        </svg>
+          <City time={time} />
+          {fx && <div className="fx-fog" />}
+        </>
       )}
       <div className="scene-content">{children}</div>
     </div>

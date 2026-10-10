@@ -97,18 +97,16 @@ export default function Setup({ onStart, onBack }) {
 
       <section className="card">
         <h3>House rules</h3>
-        <label className="check">
-          <input type="checkbox" checked={settings.healerSelfHeal} onChange={(e) => setRule('healerSelfHeal', e.target.checked)} />
-          Healer may protect themselves
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={settings.healerConsecutive} onChange={(e) => setRule('healerConsecutive', e.target.checked)} />
-          Healer may protect the same player two nights in a row
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={settings.jokerEndsGame} onChange={(e) => setRule('jokerEndsGame', e.target.checked)} />
-          Joker's win ends the whole game (otherwise it is recorded as an individual win and play continues)
-        </label>
+        {[
+          ['healerSelfHeal', 'Healer may protect themselves'],
+          ['healerConsecutive', 'Healer may protect the same player two nights in a row'],
+          ['jokerEndsGame', "Joker's win ends the whole game (otherwise it is recorded as an individual win and play continues)"],
+        ].map(([key, label]) => (
+          <label key={key} className="switchrow">
+            <span className="grow">{label}</span>
+            <input type="checkbox" role="switch" className="switch" checked={settings[key]} onChange={(e) => setRule(key, e.target.checked)} />
+          </label>
+        ))}
         <label className="field">
           If the runoff vote is tied
           <select value={settings.finalTieRule} onChange={(e) => setRule('finalTieRule', e.target.value)}>
@@ -118,7 +116,7 @@ export default function Setup({ onStart, onBack }) {
         </label>
       </section>
 
-      <section className="card">
+      <section className="card summary">
         <h3>Summary</h3>
         <div className="chips">
           {ROLE_NAMES.filter((r) => counts[r]).map((r) => (

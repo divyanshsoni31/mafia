@@ -1,6 +1,9 @@
 import { ROLES } from './game/roles.js';
 import { artFor } from './art.js';
 
+// "#ef4444" -> "239, 68, 68" for rgba(var(--x-rgb), alpha); works on browsers without color-mix().
+export const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ');
+
 export const ROLE_COLORS = {
   Mafia: '#ef4444',
   Villager: '#22c55e',
@@ -93,7 +96,7 @@ export function RoleArt({ role, size = 120 }) {
 
 export function RoleCard({ role, playerName }) {
   return (
-    <div className="role-card flip-in" style={{ '--rc': ROLE_COLORS[role] }}>
+    <div className="role-card flip-in" style={{ '--rc': ROLE_COLORS[role], '--rc-rgb': rgbOf(ROLE_COLORS[role]) }}>
       <span className="rc-corner tl">{role[0]}</span>
       <span className="rc-corner br">{role[0]}</span>
       {playerName && <p className="rc-player">{playerName}, you are</p>}

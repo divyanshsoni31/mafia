@@ -18,7 +18,7 @@ export const PHASES = {
 
 const canFullscreen = () => typeof document !== 'undefined' && !!document.documentElement.requestFullscreen;
 
-export function FullscreenButton({ className = 'btn small ghost' }) {
+export function FullscreenButton({ className = 'btn small ghost', label = false }) {
   const [on, setOn] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
   useEffect(() => {
     const sync = () => setOn(!!document.fullscreenElement);
@@ -30,7 +30,7 @@ export function FullscreenButton({ className = 'btn small ghost' }) {
   return (
     <button className={className} onClick={toggle} aria-label={on ? 'Exit full screen' : 'Full screen'}>
       {on ? '⤡' : '⛶'}
-      {className.includes('small') ? '' : on ? ' Exit full screen' : ' Play full screen'}
+      {label && (on ? ' Exit full screen' : ' Play full screen')}
     </button>
   );
 }
